@@ -1,6 +1,7 @@
 import { User } from '../entities/user.entity';
 import { Email } from '../value-objects/email';
 import { Password } from '../value-objects/password';
+import { Amount } from '../../../shared/value-objects/amount';
 
 /**
  * Injection token for User Repository
@@ -58,4 +59,12 @@ export interface UserRepositoryInterface {
    * @throws {Error} If user doesn't exist or delete operation fails.
    */
   deleteById(id: string): Promise<void>;
+
+  /**
+   * Updates a user's balance.
+   * @param {string} id - The user ID.
+   * @param {Amount} newBalance - The new balance to set.
+   * @returns {Promise<void>} Promise that resolves when balance is updated.
+   */
+  updateBalance(id: string, newBalance: Amount): Promise<void>;
 }

@@ -22,7 +22,7 @@ export interface ChangePasswordResponse {
 }
 
 /**
- * Use case for changing a user's password.
+ * Use case for updating a user's password.
  * Handles the business logic for password updates.
  * Validates current password and coordinates domain objects.
  */

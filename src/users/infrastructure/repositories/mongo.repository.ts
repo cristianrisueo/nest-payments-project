@@ -5,6 +5,7 @@ import { Model } from 'mongoose';
 import { User } from '../../domain/entities/user.entity';
 import { Email } from '../../domain/value-objects/email';
 import { Password } from '../../domain/value-objects/password';
+import { Amount } from '../../../shared/value-objects/amount';
 import { UserRepositoryInterface } from '../../domain/repositories/user.repository';
 
 /**
@@ -16,6 +17,7 @@ export interface UserDocument {
   email: string;
   password: string;
   createdAt: Date;
+  balance: number;
 }
 
 /**
@@ -46,6 +48,7 @@ export class UserRepository implements UserRepositoryInterface {
         email: user.email.value,
         password: user.password.value,
         createdAt: user.createdAt,
+        balance: user.balance.valueCents,
       });
 
       await userDocument.save();
@@ -126,6 +129,22 @@ export class UserRepository implements UserRepositoryInterface {
   }
 
   /**
+   * Updates a user's balance.
+   * @param {string} id - The user ID.
+   * @param {Amount} newBalance - The new balance amount object.
+   * @returns {Promise<void>} Promise that resolves when the balance is updated.
+   */
+  async updateBalance(id: string, newBalance: Amount): Promise<void> {
+    const result = await this.userModel
+      .updateOne({ _id: id }, { balance: newBalance.valueCents })
+      .exec();
+
+    if (result.matchedCount === 0) {
+      throw new Error('User not found');
+    }
+  }
+
+  /**
    * Deletes a user by their unique identifier.
    * @param {string} id - The user ID to delete.
    * @returns {Promise<void>} Promise that resolves when user is deleted.
@@ -150,6 +169,7 @@ export class UserRepository implements UserRepositoryInterface {
       document.email,
       document.password,
       document.createdAt,
+      document.balance,
     );
   }
 }

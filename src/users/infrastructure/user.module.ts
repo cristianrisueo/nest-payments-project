@@ -11,6 +11,7 @@ import { GetUserByIdUseCase } from '../application/getUserById';
 import { GetUserByEmailUseCase } from '../application/getUserByEmail';
 import { DeleteUserUseCase } from '../application/deleteUser';
 import { ChangePasswordUseCase } from '../application/changePassword';
+import { UpdateBalanceUseCase } from '../application/updateBalance';
 
 // Infrastructure
 import { UserRepository } from '../infrastructure/repositories/mongo.repository';
@@ -37,6 +38,7 @@ import { UserController } from '../infrastructure/user.controller';
     GetUserByEmailUseCase,
     DeleteUserUseCase,
     ChangePasswordUseCase,
+    UpdateBalanceUseCase,
 
     // Repository implementation (Infrastructure layer)
     {
@@ -52,6 +54,7 @@ import { UserController } from '../infrastructure/user.controller';
     GetUserByEmailUseCase,
     DeleteUserUseCase,
     ChangePasswordUseCase,
+    UpdateBalanceUseCase,
   ],
 })
 export class UsersModule {}

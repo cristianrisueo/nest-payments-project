@@ -1,7 +1,7 @@
 import { TransactionId } from '../value-objects/transactionId';
-import { Amount } from '../value-objects/amount';
 import { Currency } from '../value-objects/currency';
 import { PaymentMethod } from '../value-objects/paymentMethod';
+import { Amount } from '../../../shared/value-objects/amount';
 
 /**
  * Payment status enum.

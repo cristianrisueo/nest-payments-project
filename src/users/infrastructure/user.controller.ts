@@ -36,6 +36,11 @@ import {
   ChangePasswordRequest,
   ChangePasswordResponse,
 } from '../application/changePassword';
+import {
+  UpdateBalanceUseCase,
+  UpdateBalanceRequest,
+  UpdateBalanceResponse,
+} from '../application/updateBalance';
 
 /**
  * User Controller
@@ -51,6 +56,7 @@ export class UserController {
     private readonly getUserByEmailUseCase: GetUserByEmailUseCase,
     private readonly deleteUserUseCase: DeleteUserUseCase,
     private readonly changePasswordUseCase: ChangePasswordUseCase,
+    private readonly updateBalanceUseCase: UpdateBalanceUseCase,
   ) {}
 
   /**
@@ -108,6 +114,19 @@ export class UserController {
     @Body() request: Omit<ChangePasswordRequest, 'id'>,
   ): Promise<ChangePasswordResponse> {
     return await this.changePasswordUseCase.execute({ id, ...request });
+  }
+
+  /**
+   * Update user balance.
+   * PATCH /users/:id/balance
+   */
+  @Patch(':id/balance')
+  @HttpCode(HttpStatus.OK)
+  async updateBalance(
+    @Param('id') id: string,
+    @Body() request: Omit<UpdateBalanceRequest, 'id'>,
+  ): Promise<UpdateBalanceResponse> {
+    return await this.updateBalanceUseCase.execute({ id, ...request });
   }
 
   /**

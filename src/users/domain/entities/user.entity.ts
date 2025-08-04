@@ -1,6 +1,7 @@
 import { randomUUID } from 'crypto';
 import { Email } from '../value-objects/email';
 import { Password } from '../value-objects/password';
+import { Amount } from '../../../shared/value-objects/amount';
 
 /**
  * User Entity.
@@ -13,6 +14,7 @@ export class User {
     private readonly _email: Email,
     private readonly _password: Password,
     private readonly _createdAt: Date,
+    private _balance: Amount,
   ) {}
 
   /**
@@ -28,8 +30,9 @@ export class User {
     const id = randomUUID();
     const emailVO = Email.create(email);
     const passwordVO = await Password.createFromPlaintext(plainTextPassword);
+    const newBalance = Amount.create(0);
 
-    return new User(id, emailVO, passwordVO, new Date());
+    return new User(id, emailVO, passwordVO, new Date(), newBalance);
   }
 
   /**
@@ -39,6 +42,7 @@ export class User {
    * @param {string} email - The user's email address.
    * @param {string} hashedPassword - The user's already hashed password.
    * @param {Date} createdAt - When the user was created.
+   * @param {number} balanceCents - The user's balance in cents.
    * @returns {User} A recreated User instance from database data.
    */
   static createFromDatabase(
@@ -46,11 +50,13 @@ export class User {
     email: string,
     hashedPassword: string,
     createdAt: Date,
+    balanceCents: number,
   ): User {
     const emailVO = Email.create(email);
     const passwordVO = Password.createFromHash(hashedPassword);
+    const balanceFromDB = Amount.create(balanceCents);
 
-    return new User(id, emailVO, passwordVO, createdAt);
+    return new User(id, emailVO, passwordVO, createdAt, balanceFromDB);
   }
 
   /**
@@ -95,6 +101,14 @@ export class User {
   }
 
   /**
+   * Gets the user's balance.
+   * @returns {Amount} The user's balance value object.
+   */
+  get balance(): Amount {
+    return this._balance;
+  }
+
+  /**
    * Compares this user with another user.
    * Two users are considered equal if they have the same ID.
    * @param {User} other - The other user to compare with.
@@ -102,6 +116,22 @@ export class User {
    */
   equals(other: User): boolean {
     return this._id === other._id;
+  }
+
+  /**
+   * Updates the user's balance and returns a new User instance.
+   * Maintains immutability by creating a new User with the updated balance.
+   * @param {Amount} newBalance - The new balance to set.
+   * @returns {User} A new User instance with the updated balance.
+   */
+  updateBalance(newBalance: Amount): User {
+    return new User(
+      this._id,
+      this._email,
+      this._password,
+      this._createdAt,
+      newBalance,
+    );
   }
 
   /**
@@ -114,7 +144,13 @@ export class User {
     const newPasswordVO =
       await Password.createFromPlaintext(newPlaintextPassword);
 
-    return new User(this._id, this._email, newPasswordVO, this._createdAt);
+    return new User(
+      this._id,
+      this._email,
+      newPasswordVO,
+      this._createdAt,
+      this._balance,
+    );
   }
 
   /**
@@ -122,6 +158,6 @@ export class User {
    * @returns {string} String representation of the user
    */
   toString(): string {
-    return `User ${this._email.value} (ID: ${this._id})`;
+    return `User ${this._email.value} (ID: ${this._id}) - Balance: ${this._balance.toFormattedString()}`;
   }
 }

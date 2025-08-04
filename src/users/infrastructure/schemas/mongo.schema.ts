@@ -26,6 +26,11 @@ export const UserSchema = new Schema(
       required: true,
       default: Date.now,
     },
+    balance: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
   },
   {
     _id: false, // Disables automatic _id generation since we provide our own
