@@ -1,12 +1,12 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { Payment } from '../domain/entities/payment.entity';
-import { Amount } from '../../shared/value-objects/amount';
 import { Currency } from '../domain/value-objects/currency';
 import { PaymentMethod } from '../domain/value-objects/paymentMethod';
 import {
   PaymentRepositoryInterface,
   PAYMENT_REPOSITORY_TOKEN,
 } from '../domain/repositories/payment.repository';
+import { Amount } from '../../shared/value-objects/amount';
 
 /**
  * Request object for sending a payment.
