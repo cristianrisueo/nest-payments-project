@@ -116,4 +116,12 @@ export class User {
 
     return new User(this._id, this._email, newPasswordVO, this._createdAt);
   }
+
+  /**
+   * Converts to string representation.
+   * @returns {string} String representation of the user
+   */
+  toString(): string {
+    return `User ${this._email.value} (ID: ${this._id})`;
+  }
 }

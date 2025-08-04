@@ -9,7 +9,7 @@ import { Password } from '../value-objects/password';
 export const USER_REPOSITORY_TOKEN = 'USER_REPOSITORY_TOKEN';
 
 /**
- * User Repository Interface
+ * User Repository Interface.
  * Defines the contract for user persistence operations.
  * Implementation details are handled by infrastructure layer.
  */

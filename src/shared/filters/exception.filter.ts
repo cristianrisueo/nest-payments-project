@@ -41,7 +41,7 @@ export class DomainExceptionFilter implements ExceptionFilter {
   }
 
   /**
-   * Maps domain error messages to HTTP status codes and user-friendly messages.
+   * Helper funtion that maps domain error messages to HTTP status codes and user-friendly messages.
    * @param errorMessage The error message from the domain.
    * @returns An object containing the HTTP status code and a user-friendly message.
    */

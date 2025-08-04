@@ -136,6 +136,7 @@ npm run start:dev
 ### Request/Response Examples
 
 **Register User:**
+
 ```json
 POST /users/register
 {
@@ -152,6 +153,7 @@ Response: 201 Created
 ```
 
 **Authenticate User:**
+
 ```json
 POST /users/authenticate
 {
@@ -179,6 +181,7 @@ Users_API_Collection.postman_collection.json
 ```
 
 **Test Coverage:**
+
 - ✅ User registration with validation
 - ✅ Authentication flows
 - ✅ Profile retrieval operations
@@ -196,32 +199,39 @@ Users_API_Collection.postman_collection.json
 ### Domain Models
 
 **User Entity:**
+
 - Unique UUID identifier
 - Email value object with validation
 - Password value object with bcrypt hashing
 - Creation timestamp
-- Immutable domain model
+- Immutable domain model (inmutable only the value objects not the entity)
 
 **Value Objects:**
+
 - `Email`: Format validation, normalization
 - `Password`: Strength requirements, secure hashing
 
 ## 🔧 Domain-Driven Design Features
 
 ### Value Objects
+
 - **Email**: Validates format, normalizes case and whitespace
 - **Password**: Enforces security rules, handles hashing/verification
 
 ### Aggregate Roots
+
 - **User**: Controls all user-related data and business rules
 
 ### Repository Pattern
+
 - Interface-based contracts in domain layer
 - MongoDB implementation in infrastructure layer
 - Dependency injection with tokens
 
 ### Use Cases
+
 Clean application services that orchestrate domain logic:
+
 - Business rule validation
 - Domain object coordination
 - Error handling and response formatting
