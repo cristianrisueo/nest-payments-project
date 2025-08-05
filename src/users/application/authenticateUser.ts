@@ -4,6 +4,7 @@ import {
   UserRepositoryInterface,
   USER_REPOSITORY_TOKEN,
 } from '../domain/repositories/user.repository';
+import { JwtService } from '../../shared/auth/jwt.service';
 
 /**
  * Request object for user authentication.
@@ -20,6 +21,7 @@ export interface AuthenticateUserResponse {
   id: string;
   email: string;
   isAuthenticated: boolean;
+  accessToken: string;
 }
 
 /**
@@ -32,6 +34,7 @@ export class AuthenticateUserUseCase {
   constructor(
     @Inject(USER_REPOSITORY_TOKEN)
     private readonly userRepository: UserRepositoryInterface,
+    private readonly jwtService: JwtService,
   ) {}
 
   /**
@@ -58,11 +61,18 @@ export class AuthenticateUserUseCase {
       throw new Error('Invalid credentials');
     }
 
+    // Generates JWT token for authenticated user
+    const accessToken = this.jwtService.generateToken(
+      user.id,
+      user.email.value,
+    );
+
     // Returns success response
     return {
       id: user.id,
       email: user.email.value,
       isAuthenticated: true,
+      accessToken,
     };
   }
 }

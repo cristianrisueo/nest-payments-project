@@ -1,6 +1,9 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
+// Shared infrastructure
+import { AuthModule } from '../../shared/auth/auth.module';
+
 // Domain
 import { PAYMENT_REPOSITORY_TOKEN } from '../domain/repositories/payment.repository';
 
@@ -27,14 +30,17 @@ import { UserSchema } from '../../users/infrastructure/schemas/mongo.schema';
  * Follows hexagonal architecture principles with clean dependency injection.
  */
 @Module({
-  // Registers Payment schema with the 'payments' database connection
-  // Also imports User schema for cross-domain operations
   imports: [
+    // Registers Payment schema with the 'payments' database connection
+    // Also imports User schema for cross-domain operations
     MongooseModule.forFeature(
       [{ name: 'Payment', schema: PaymentSchema }],
       'payments',
     ),
     MongooseModule.forFeature([{ name: 'User', schema: UserSchema }], 'users'),
+
+    // Import Auth module for JWT functionality
+    AuthModule,
   ],
   // Controllers (HTTP layer)
   controllers: [PaymentController],

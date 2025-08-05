@@ -5,6 +5,8 @@ import { APP_FILTER } from '@nestjs/core';
 // Shared infrastructure
 import { dbConfig } from './shared/db/db.config';
 import { DbModule } from './shared/db/db.module';
+import { jwtConfig } from './shared/auth/jwt.config';
+import { AuthModule } from './shared/auth/auth.module';
 import { DomainExceptionFilter } from './shared/filters/exception.filter';
 
 // Domain modules
@@ -22,11 +24,12 @@ import { PaymentsModule } from './payments/infrastructure/payments.module';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
-      load: [dbConfig],
+      load: [dbConfig, jwtConfig],
     }),
 
     // Shared infrastructure
     DbModule,
+    AuthModule,
 
     // Domain modules
     UsersModule,

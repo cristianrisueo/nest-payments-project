@@ -33,6 +33,39 @@ services:
     networks:
       - payments_network
 
+  # Payments API Application
+  payments_api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: payments_api
+    restart: unless-stopped
+    environment:
+      # Database Configuration
+      USERS_DB_URL: mongodb://admin:users123@users_db:27017/users_db?authSource=admin
+      PAYMENTS_DB_URL: mongodb://admin:payments123@payments_db:27017/payments_db?authSource=admin
+
+      # JWT Configuration
+      JWT_SECRET: your-super-secret-production-key-change-this
+      JWT_EXPIRES_IN: 24h
+
+      # Application Configuration
+      PORT: 3000
+      NODE_ENV: production
+    ports:
+      - '3000:3000'
+    depends_on:
+      - users_db
+      - payments_db
+    networks:
+      - payments_network
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
 volumes:
   users_mongodb_data:
     driver: local

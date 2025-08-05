@@ -1,6 +1,9 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
+// Shared infrastructure
+import { AuthModule } from '../../shared/auth/auth.module';
+
 // Domain
 import { USER_REPOSITORY_TOKEN } from '../domain/repositories/user.repository';
 
@@ -24,9 +27,12 @@ import { UserController } from './users.controller';
  * Follows hexagonal architecture principles with clean dependency injection.
  */
 @Module({
-  // Registers User schema with the 'users' database connection
   imports: [
+    // Registers User schema with the 'users' database connection
     MongooseModule.forFeature([{ name: 'User', schema: UserSchema }], 'users'),
+
+    // Import Auth module for JWT functionality
+    AuthModule,
   ],
   // Controllers (HTTP layer)
   controllers: [UserController],

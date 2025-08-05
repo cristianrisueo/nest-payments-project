@@ -52,6 +52,12 @@ src/
 │       ├── repositories/    # MongoDB implementation
 │       └── schemas/         # Payment data schemas
 ├── shared/                  # Cross-cutting concerns
+│   ├── auth/                # JWT authentication
+│   │   ├── jwt.service.ts   # Token generation/validation
+│   │   ├── jwt.guard.ts     # Route protection
+│   │   ├── auth.decorator.ts # Auth decorators (@Auth, @CurrentUser)
+│   │   ├── jwt.config.ts    # JWT configuration
+│   │   └── auth.module.ts   # Authentication module
 │   ├── value-objects/       # Amount (shared between domains)
 │   ├── db/                  # Database configuration
 │   └── filters/             # Exception handling
@@ -133,6 +139,10 @@ Create `.env` file in project root:
 USERS_DB_URL=mongodb://admin:users123@localhost:27017/users_db?authSource=admin
 PAYMENTS_DB_URL=mongodb://admin:payments123@localhost:27018/payments_db?authSource=admin
 
+# JWT Configuration
+JWT_SECRET=your-super-secret-key-change-in-production
+JWT_EXPIRES_IN=24h
+
 # Application Configuration
 PORT=3000
 NODE_ENV=development
@@ -154,21 +164,21 @@ npm run start:dev
 
 ### User Management
 
-- `POST /users/register` - Register new user with email/password
-- `POST /users/authenticate` - Authenticate user credentials
-- `GET /users/:id` - Retrieve user by unique identifier
-- `GET /users/email/:email` - Find user by email address
-- `PATCH /users/:id/password` - Change user password
-- `PATCH /users/:id/balance` - Update user balance
-- `DELETE /users/:id` - Delete user account
+- `POST /users/register` - Register new user with email/password (Public)
+- `POST /users/authenticate` - Authenticate user and get JWT token (Public)
+- `GET /users/:id` - Retrieve user profile (Protected - own profile only)
+- `GET /users/email/:email` - Find user by email (Protected - own email only)
+- `PATCH /users/:id/password` - Change user password (Protected - own account only)
+- `PATCH /users/:id/balance` - Update user balance (Protected - own account only)
+- `DELETE /users/:id` - Delete user account (Protected - own account only)
 
-### Payment Processing
+### Payment Processing (All Protected)
 
-- `POST /payments` - Create new P2P payment
-- `GET /payments/:transactionId` - Retrieve payment details
-- `PATCH /payments/:transactionId/process` - Process pending payment
-- `PATCH /payments/:transactionId/refund` - Refund completed payment
-- `GET /payments/user/:userId/history` - Get user payment history
+- `POST /payments` - Create new P2P payment (Must authenticate as sender)
+- `GET /payments/:transactionId` - Retrieve payment details (Sender or receiver only)
+- `PATCH /payments/:transactionId/process` - Process pending payment (Sender only)
+- `PATCH /payments/:transactionId/refund` - Refund completed payment (Sender only)
+- `GET /payments/user/:userId/history` - Get user payment history (Own history only)
 
 ### Request/Response Examples
 
@@ -189,10 +199,29 @@ Response: 201 Created
 }
 ```
 
-**Send Payment:**
+**Authenticate User:**
+
+```json
+POST /users/authenticate
+{
+  "email": "alice@payments.com",
+  "password": "SecurePass123"
+}
+
+Response: 200 OK
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "email": "alice@payments.com",
+  "isAuthenticated": true,
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+**Send Payment (with JWT):**
 
 ```json
 POST /payments
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 {
   "fromUserId": "550e8400-e29b-41d4-a716-446655440000",
   "toUserId": "660f9511-f39c-52e5-b827-557766551111",
@@ -289,14 +318,17 @@ postman/
 
 **Test Coverage:**
 
-- ✅ User registration and authentication flows
-- ✅ Balance management operations
-- ✅ Complete payment lifecycle (Send → Process → Refund)
-- ✅ Payment history and retrieval operations
-- ✅ Error handling scenarios
+- ✅ User registration and JWT authentication flows
+- ✅ Token-based authorization for all protected endpoints
+- ✅ Balance management operations with proper authentication
+- ✅ Complete payment lifecycle (Send → Process → Refund) with JWT
+- ✅ Payment history and retrieval operations (authorized users only)
+- ✅ Security testing (unauthorized access attempts, invalid tokens)
+- ✅ Cross-user authorization validation (users can't access others' data)
+- ✅ Error handling scenarios with proper HTTP status codes
 - ✅ Balance validation and insufficient funds testing
-- ✅ Cross-domain operations validation
-- ✅ Automated assertions and variable chaining
+- ✅ Cross-domain operations validation with JWT context
+- ✅ Automated assertions and JWT token variable chaining
 - ✅ Environment-based testing (local, staging, production)
 
 ### Unit Testing
@@ -409,12 +441,15 @@ Clean application services that orchestrate domain logic:
 
 ## 📋 Security Features
 
-- **Password Hashing**: bcrypt with 12 salt rounds
+- **JWT Authentication**: Stateless token-based authentication with 24-hour expiration
+- **Authorization Controls**: Users can only access their own resources and data
+- **Route Protection**: All payment and user management operations require authentication
+- **Password Hashing**: bcrypt with 12 salt rounds for secure password storage
 - **Input Validation**: Email format, password strength, amount validation
-- **Balance Verification**: Insufficient funds protection
-- **Error Handling**: Secure error messages preventing enumeration
+- **Balance Verification**: Insufficient funds protection with atomic operations
+- **Error Handling**: Secure error messages preventing information leakage
 - **Domain Validation**: Business rules enforced at entity level
-- **Transaction Integrity**: Atomic balance operations
+- **Transaction Integrity**: Atomic balance operations prevent data inconsistency
 
 ## 🔄 Payment Lifecycle
 
@@ -499,22 +534,32 @@ npm run lint && npm run test && npm run start:dev
 
 **Users Domain:**
 - Complete user lifecycle management
-- Authentication and authorization
+- JWT-based authentication and authorization  
+- Secure token generation and validation
+- Resource-level access control (users can only access their own data)
 - Balance management with monetary operations
 - Password security with bcrypt hashing
 - Email validation and normalization
 
 **Payments Domain:**
-- Full P2P payment processing
-- Real-time balance transfers
+- Full P2P payment processing with JWT authentication
+- Real-time balance transfers with authorization checks
 - Payment status lifecycle management
-- Transaction history and audit trails
-- Refund operations with balance restoration
-- Cross-domain user integration
+- Transaction history and audit trails (authorized access only)
+- Refund operations with balance restoration (sender authorization required)
+- Cross-domain user integration with secure context
+
+**Security & Authentication:**
+- JWT token-based stateless authentication
+- Route-level protection with guards and decorators
+- Authorization middleware ensuring resource isolation
+- 24-hour token expiration with configurable settings
+- Bearer token standard implementation
+- Security testing coverage for unauthorized access attempts
 
 **Infrastructure:**
 - Dual MongoDB database architecture
-- Comprehensive Postman API collections
+- Comprehensive Postman API collections with JWT workflows
 - Docker containerization
 - Professional documentation
 - Clean git history with meaningful commits
@@ -537,14 +582,16 @@ npm run lint && npm run test && npm run start:dev
 
 ### 🔮 Future Enhancements
 
-- **JWT Authentication**: Token-based session management
-- **Email Verification**: Account activation workflows
-- **Payment Providers**: Integration with Stripe, PayPal
-- **Event Sourcing**: Domain events for audit trails
-- **CQRS**: Command Query Responsibility Segregation
-- **Real-time Notifications**: WebSocket payment updates
-- **Rate Limiting**: API throttling and protection
-- **Caching**: Redis for performance optimization
+- **Refresh Tokens**: Implement refresh token rotation for enhanced security
+- **Role-Based Access Control**: Add admin, user, and merchant roles
+- **Email Verification**: Account activation workflows with email confirmation
+- **Payment Providers**: Integration with Stripe, PayPal, and other gateways
+- **Event Sourcing**: Domain events for comprehensive audit trails
+- **CQRS**: Command Query Responsibility Segregation for scalability
+- **Real-time Notifications**: WebSocket payment updates and alerts
+- **Rate Limiting**: API throttling and DDoS protection
+- **Caching**: Redis for performance optimization and session management
+- **Microservices**: Split domains into independent services with API Gateway
 
 ## 📝 Architecture Principles Applied
 
