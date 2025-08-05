@@ -66,7 +66,7 @@ export class Amount {
    * @returns {string} Formatted currency string
    */
   toFormattedString(): string {
-    return this.valueDecimal.toFixed(2);
+    return `$${this.valueDecimal.toFixed(2)}`;
   }
 
   /**

@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER } from '@nestjs/core';
 
 // Shared infrastructure
+import { dbConfig } from './shared/db/db.config';
 import { DbModule } from './shared/db/db.module';
 import { DomainExceptionFilter } from './shared/filters/exception.filter';
 
@@ -21,6 +22,7 @@ import { PaymentsModule } from './payments/infrastructure/payments.module';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
+      load: [dbConfig],
     }),
 
     // Shared infrastructure
