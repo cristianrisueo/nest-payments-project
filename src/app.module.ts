@@ -1,25 +1,41 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { DbModule } from './shared/db/db.module';
-import { dbConfig } from './shared/db/db.config';
-import { UsersModule } from './users/infrastructure/user.module';
+import { APP_FILTER } from '@nestjs/core';
 
+// Shared infrastructure
+import { DbModule } from './shared/db/db.module';
+import { DomainExceptionFilter } from './shared/filters/exception.filter';
+
+// Domain modules
+import { UsersModule } from './users/infrastructure/users.module';
+import { PaymentsModule } from './payments/infrastructure/payments.module';
+
+/**
+ * Root Application Module.
+ * Configures the main application with all domain modules and shared infrastructure.
+ * Follows hexagonal architecture with clean module separation.
+ */
 @Module({
   imports: [
-    // Global configuration
+    // Environment configuration
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [dbConfig],
       envFilePath: '.env',
     }),
 
-    // Database connections
+    // Shared infrastructure
     DbModule,
 
     // Domain modules
     UsersModule,
+    PaymentsModule,
   ],
-  controllers: [],
-  providers: [],
+  providers: [
+    // Global exception filter for domain errors
+    {
+      provide: APP_FILTER,
+      useClass: DomainExceptionFilter,
+    },
+  ],
 })
 export class AppModule {}

@@ -16,10 +16,10 @@ import { UpdateBalanceUseCase } from '../application/updateBalance';
 // Infrastructure
 import { UserRepository } from '../infrastructure/repositories/mongo.repository';
 import { UserSchema } from '../infrastructure/schemas/mongo.schema';
-import { UserController } from '../infrastructure/user.controller';
+import { UserController } from './users.controller';
 
 /**
- * Users Module
+ * Users Module.
  * Configures and wires together all components of the users domain.
  * Follows hexagonal architecture principles with clean dependency injection.
  */
